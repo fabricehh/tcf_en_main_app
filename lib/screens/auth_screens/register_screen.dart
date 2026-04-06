@@ -25,6 +25,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
+  bool _registrationSuccess = false;
 
   int _passwordStrengthLevel = 0;
   String _passwordStrengthLabel = 'Force du mot de passe';
@@ -117,14 +118,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (!mounted) return;
 
-      _showToast(
-        'Compte créé avec succès ! Vérifiez votre email.',
-        isError: false,
-      );
-
-      await Future.delayed(const Duration(seconds: 2));
-      if (!mounted) return;
-      context.go(RoutesClass.login);
+      setState(() => _registrationSuccess = true);
     } on AuthException catch (e) {
       if (!mounted) return;
       if (e.message.contains('already registered')) {
@@ -302,21 +296,119 @@ class _RegisterScreenState extends State<RegisterScreen> {
         children: [
           _buildHeader(),
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            child: _registrationSuccess
+                ? _buildSuccessContent()
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTitleSection(),
+                        const SizedBox(height: 24),
+                        _buildForm(),
+                        const SizedBox(height: 20),
+                        _buildLoginLink(),
+                      ],
+                    ),
+                  ),
+          ),
+          _buildFooter(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuccessContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.green.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.check_circle_outline,
+              color: Colors.green,
+              size: 44,
+            ),
+          ),
+          const SizedBox(height: 28),
+          Text(
+            'Compte créé avec succès !',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontSize: 26,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Un email de confirmation a été envoyé à',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _emailController.text.trim(),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.bgInput,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.mark_email_unread_outlined,
+                  color: AppColors.accent,
+                  size: 32,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Veuillez vérifier votre boîte de réception et cliquer sur le lien de confirmation pour activer votre compte.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        height: 1.6,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Pensez à vérifier vos spams si vous ne trouvez pas l\'email.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: 13,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => context.go(RoutesClass.login),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildTitleSection(),
-                  const SizedBox(height: 24),
-                  _buildForm(),
-                  const SizedBox(height: 20),
-                  _buildLoginLink(),
+                  Icon(Icons.login, size: 20),
+                  SizedBox(width: 8),
+                  Text('Aller à la connexion'),
                 ],
               ),
             ),
           ),
-          _buildFooter(),
         ],
       ),
     );
