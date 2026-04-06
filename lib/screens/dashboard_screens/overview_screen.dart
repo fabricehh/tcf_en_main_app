@@ -124,14 +124,14 @@ class _OverviewScreenState extends State<OverviewScreen> {
               borderRadius: BorderRadius.circular(8),
               child: Image.asset(
                 'assets/logos/logo_app.png',
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 fit: BoxFit.contain,
               ),
             ),
             const SizedBox(width: 10),
             const Text(
-              'TCF Canada Training',
+              'TCF En Main',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,

@@ -5,6 +5,7 @@ import '../screens/auth_screens/forgot_password_screen.dart';
 import '../screens/auth_screens/login_screen.dart';
 import '../screens/auth_screens/register_screen.dart';
 import '../screens/auth_screens/reset_password_screen.dart';
+import '../screens/dashboard_screens/audio_test_screen.dart';
 import '../screens/dashboard_screens/overview_screen.dart';
 import '../screens/splash_screen/splash_screen.dart';
 
@@ -19,6 +20,7 @@ class RoutesClass {
   static const String forgotPassword = '/mot-pass-oublie';
   static const String resetPassword = '/modifier-mot-passe';
   static const String overview = '/app/vue-d-ensemble';
+  static const String audioTest = '/app/test-audio';
   static const String profile = '/app/profil';
 
   static final GoRouter router = GoRouter(
@@ -59,6 +61,13 @@ class RoutesClass {
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const OverviewScreen(),
+            ),
+          ),
+          GoRoute(
+            path: 'test-audio',
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const AudioTestScreen(),
             ),
           ),
         ],
