@@ -111,8 +111,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
         data: {
-          'first_name': _firstNameController.text.trim(),
-          'last_name': _lastNameController.text.trim(),
+          'first_name': _firstNameController.text.trim().toUpperCase(),
+          'last_name': _lastNameController.text.trim().toUpperCase(),
         },
       );
 
