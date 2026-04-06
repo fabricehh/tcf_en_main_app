@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../screens/auth_screens/forgot_password_screen.dart';
 import '../screens/auth_screens/login_screen.dart';
 import '../screens/auth_screens/register_screen.dart';
+import '../screens/auth_screens/reset_password_screen.dart';
 import '../screens/dashboard_screens/overview_screen.dart';
 import '../screens/splash_screen/splash_screen.dart';
 
@@ -16,6 +17,7 @@ class RoutesClass {
   static const String login = '/connexion';
   static const String register = '/inscription';
   static const String forgotPassword = '/mot-pass-oublie';
+  static const String resetPassword = '/modifier-mot-passe';
   static const String overview = '/app/vue-d-ensemble';
   static const String profile = '/app/profil';
 
@@ -38,6 +40,10 @@ class RoutesClass {
       GoRoute(
         path: forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: resetPassword,
+        builder: (context, state) => const ResetPasswordScreen(),
       ),
       GoRoute(
         path: '/app',
