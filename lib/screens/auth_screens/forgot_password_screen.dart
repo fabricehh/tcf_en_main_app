@@ -50,6 +50,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       final supabase = Supabase.instance.client;
       await supabase.auth.resetPasswordForEmail(
         _emailController.text.trim(),
+        redirectTo: "https://tcf-en-main-app.vercel.app/mot-pass-oublie"
       );
 
       if (!mounted) return;
