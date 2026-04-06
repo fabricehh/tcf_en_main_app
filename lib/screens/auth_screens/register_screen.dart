@@ -41,13 +41,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _showToast(String message, {bool isError = true}) {
+    final bgColor = isError ? '#e53935' : '#43a047';
     Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_LONG,
+      timeInSecForIosWeb: 5,
       gravity: ToastGravity.TOP,
-      backgroundColor: isError ? AppColors.error : AppColors.bgPanel,
+      backgroundColor: isError ? Colors.red : Colors.green,
       textColor: Colors.white,
       fontSize: 14,
+      webBgColor: bgColor,
     );
   }
 
@@ -232,7 +235,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(
                     width: 550,
                     child: Text(
-                      'Rejoignez TCF Canada Training et commencez votre apprentissage du français. '
+                      'Rejoignez TCF En Main et commencez votre apprentissage du français. '
                           'Créez votre compte gratuitement et accédez à des milliers de questions et exercices.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -339,7 +342,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           const SizedBox(width: 10),
           Text(
-            'TCF Canada Training',
+            'TCF En Main',
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: AppColors.accent,
                   fontWeight: FontWeight.w700,

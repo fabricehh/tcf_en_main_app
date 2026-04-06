@@ -7,26 +7,23 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../routes/routes.dart';
 import '../../theme/theme.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
 
-  bool _obscurePassword = true;
-  bool _rememberMe = false;
   bool _isLoading = false;
+  bool _emailSent = false;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
@@ -35,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_LONG,
-      timeInSecForIosWeb: isError ? 5 : 2,
+      timeInSecForIosWeb: 5,
       gravity: ToastGravity.TOP,
       backgroundColor: isError ? Colors.red : Colors.green,
       textColor: Colors.white,
@@ -44,36 +41,30 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleResetPassword() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
     try {
       final supabase = Supabase.instance.client;
-      final response = await supabase.auth.signInWithPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+      await supabase.auth.resetPasswordForEmail(
+        _emailController.text.trim(),
       );
 
       if (!mounted) return;
 
-      if (response.user != null) {
-        _showToast('Connexion réussie !', isError: false);
-        context.go(RoutesClass.overview);
-      }
+      setState(() => _emailSent = true);
+      _showToast(
+        'Un email de réinitialisation a été envoyé !',
+        isError: false,
+      );
     } on AuthException catch (e) {
       if (!mounted) return;
-      if (e.message.contains('Invalid login credentials')) {
-        _showToast('Email ou mot de passe incorrect');
-      } else if (e.message.contains('Email not confirmed')) {
-        _showToast('Veuillez vérifier votre email avant de vous connecter');
-      } else {
-        _showToast(e.message);
-      }
+      _showToast(e.message);
     } catch (_) {
       if (!mounted) return;
-      _showToast('Erreur de connexion. Veuillez réessayer.');
+      _showToast('Une erreur est survenue. Veuillez réessayer.');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -86,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 900, maxHeight: 650),
+            constraints: const BoxConstraints(maxWidth: 900, maxHeight: 550),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: AppColors.bgCard,
@@ -108,11 +99,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       return Row(
                         children: [
                           Expanded(child: _buildLeftPanel()),
-                          Expanded(child: _buildLoginForm()),
+                          Expanded(
+                            child: _emailSent
+                                ? _buildSuccessContent()
+                                : _buildFormContent(),
+                          ),
                         ],
                       );
                     }
-                    return _buildLoginForm();
+                    return _emailSent
+                        ? _buildSuccessContent()
+                        : _buildFormContent();
                   },
                 ),
               ),
@@ -124,13 +121,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildLeftPanel() {
-    const features = [
-      'Évaluation IA en temps réel',
-      'Feedback détaillé et personnalisé',
-      'Suivi de progression',
-      'Tests simulés authentiques',
-    ];
-
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -160,77 +150,38 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.asset(
-                        'assets/logos/logo_app.png',
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Flexible(
-                      child: Text(
-                        'TCF En Main',
-                        style:
-                            Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 30,
-                                ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.lock_reset,
+                    color: Colors.white,
+                    size: 40,
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 24),
                 Text(
-                  "Plateforme d'entraînement\npour le TCF Canada",
+                  'Réinitialisation\ndu mot de passe',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontSize: 26,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Pas de panique ! Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: Colors.white.withValues(alpha: 0.85),
                         fontWeight: FontWeight.w300,
-                        height: 1.4,
+                        fontSize: 16,
+                        height: 1.5,
                       ),
-                ),
-                const SizedBox(height: 40),
-                ...features.map(
-                  (text) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check_circle_outline,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Text(
-                            text,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w400,
-                              height: 1.3,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -240,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginForm() {
+  Widget _buildFormContent() {
     return Container(
       color: AppColors.bgCard,
       child: SingleChildScrollView(
@@ -257,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 24),
               _buildForm(),
               const SizedBox(height: 24),
-              _buildRegisterLink(),
+              _buildLoginLink(),
             ],
           ),
         ),
@@ -267,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildBackLink() {
     return InkWell(
-      onTap: () => context.go(RoutesClass.splash),
+      onTap: () => context.go(RoutesClass.login),
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -277,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Icon(Icons.arrow_back, size: 18, color: AppColors.textMuted),
             const SizedBox(width: 8),
             Text(
-              "Retour à l'accueil",
+              'Retour à la connexion',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -291,12 +242,12 @@ class _LoginScreenState extends State<LoginScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Connexion',
+          'Mot de passe oublié',
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         const SizedBox(height: 6),
         Text(
-          'Accédez à votre compte',
+          'Entrez votre adresse email pour recevoir un lien de réinitialisation',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ],
@@ -314,7 +265,8 @@ class _LoginScreenState extends State<LoginScreen> {
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
+            textInputAction: TextInputAction.done,
+            onFieldSubmitted: (_) => _handleResetPassword(),
             decoration: const InputDecoration(
               hintText: 'votre@email.com',
               prefixIcon: Icon(Icons.mail_outline),
@@ -329,65 +281,11 @@ class _LoginScreenState extends State<LoginScreen> {
               return null;
             },
           ),
-          const SizedBox(height: 20),
-          Text('Mot de passe', style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _handleLogin(),
-            decoration: InputDecoration(
-              hintText: 'Votre mot de passe',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                ),
-                onPressed: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
-              ),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez entrer votre mot de passe';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              SizedBox(
-                height: 24,
-                width: 24,
-                child: Checkbox(
-                  value: _rememberMe,
-                  onChanged: (v) => setState(() => _rememberMe = v ?? false),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'Se souvenir de moi',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () => context.go(RoutesClass.forgotPassword),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text('Mot de passe oublié ?'),
-              ),
-            ],
-          ),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isLoading ? null : _handleLogin,
+              onPressed: _isLoading ? null : _handleResetPassword,
               child: _isLoading
                   ? const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -398,7 +296,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ],
                     )
-                  : const Text('Se connecter'),
+                  : const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.send_outlined, size: 20),
+                        SizedBox(width: 8),
+                        Text('Envoyer le lien'),
+                      ],
+                    ),
             ),
           ),
         ],
@@ -406,17 +312,17 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildRegisterLink() {
+  Widget _buildLoginLink() {
     return Center(
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Pas encore de compte ? ',
+            'Vous vous en souvenez ? ',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           TextButton(
-            onPressed: () => context.go(RoutesClass.register),
+            onPressed: () => context.go(RoutesClass.login),
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               minimumSize: Size.zero,
@@ -426,9 +332,81 @@ class _LoginScreenState extends State<LoginScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            child: const Text("S'inscrire"),
+            child: const Text('Se connecter'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSuccessContent() {
+    return Container(
+      color: AppColors.bgCard,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 32),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppColors.bgPanel.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.mark_email_read_outlined,
+                  color: AppColors.bgPanel,
+                  size: 36,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Email envoyé !',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Un lien de réinitialisation a été envoyé à',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _emailController.text.trim(),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Vérifiez votre boîte de réception et suivez les instructions pour créer un nouveau mot de passe.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      height: 1.5,
+                    ),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => context.go(RoutesClass.login),
+                  child: const Text('Retour à la connexion'),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () {
+                  setState(() => _emailSent = false);
+                },
+                child: const Text("Renvoyer l'email"),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

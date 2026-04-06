@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../screens/auth_screens/forgot_password_screen.dart';
 import '../screens/auth_screens/login_screen.dart';
 import '../screens/auth_screens/register_screen.dart';
+import '../screens/dashboard_screens/overview_screen.dart';
 import '../screens/splash_screen/splash_screen.dart';
 
 
@@ -13,6 +15,7 @@ class RoutesClass {
   static const String splash = '/';
   static const String login = '/connexion';
   static const String register = '/inscription';
+  static const String forgotPassword = '/mot-pass-oublie';
   static const String overview = '/app/vue-d-ensemble';
   static const String profile = '/app/profil';
 
@@ -33,6 +36,10 @@ class RoutesClass {
         builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
+        path: forgotPassword,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
         path: '/app',
         redirect: (context, state) async {
           if (state.fullPath == '/app' || state.fullPath == '/app/') {
@@ -41,20 +48,13 @@ class RoutesClass {
           return null;
         },
         routes: [
-         /* GoRoute(
-            path: 'dashboard',
+          GoRoute(
+            path: 'vue-d-ensemble',
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const DashboardScreen(),
+              child: const OverviewScreen(),
             ),
           ),
-          GoRoute(
-            path: 'profile',
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const ProfileScreen(),
-            ),
-          ),*/
         ],
       ),
     ],
@@ -69,7 +69,7 @@ class RoutesClass {
       if (protectedRoute && !isLoggedIn) {
         return login;
       }
-      // Si l'utilisateur est connecté et essaie d'accéder à /login, rediriger vers /app/dashboard
+      // Si l'utilisateur est connecté et essaie d'accéder à /login, rediriger vers /app/vue-d-ensemble
       if (path == login && isLoggedIn) {
         return overview;
       }

@@ -184,6 +184,11 @@ class AppTheme {
         color: AppColors.border,
         thickness: 1,
       ),
+      textSelectionTheme: TextSelectionThemeData(
+        selectionColor: const Color(0xFF0656C7).withValues(alpha: 0.5),
+        cursorColor: const Color(0xFF0656C7),
+        selectionHandleColor: const Color(0xFF0656C7),
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.bgCard,
         elevation: 0,

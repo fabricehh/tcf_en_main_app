@@ -32,7 +32,18 @@ class TCFEnMainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       routerConfig: RoutesClass.router,
-      builder: FToastBuilder(),
+      builder: (context, child) {
+        child = FToastBuilder()(context, child);
+        return Overlay(
+          initialEntries: [
+            OverlayEntry(
+              builder: (_) => SelectionArea(
+                child: child ?? const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
